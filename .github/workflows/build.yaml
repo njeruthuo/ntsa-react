@@ -1,0 +1,29 @@
+name: Build the code
+
+on:
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    build-react:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                node-version: [18, 20, 22]
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup NodeJS
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: npm
+
+            - name: Build the application
+              run: |
+                  npm install
+                  npm run build
