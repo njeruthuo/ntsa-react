@@ -1,17 +1,20 @@
+import { Button } from "@/components/ui/button";
+
 const Dashboard = () => {
   return (
-    <div className="dashboard-page">
-      {/* Header */}
-      
+    <div className="dashboard-page mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
 
       <div className="dashboard-content">
         {/* Search Section */}
         <section className="search-section">
-          <h3>Search Vehicle</h3>
-          <div className="search-bar">
-            <input type="text" placeholder="Enter Registration Number" />
-            <button>Search</button>
-            <button className="back-btn">Back</button>
+          <h3 className="font-bold my-2">Search Vehicle</h3>
+          <div className="flex w-full space-x-4 mb-4">
+            <input
+              className="flex-3 px-4"
+              type="text"
+              placeholder="Enter Registration Number"
+            />
+            <Button className="ml-auto">Search</Button>
           </div>
 
           <div className="data-buttons">

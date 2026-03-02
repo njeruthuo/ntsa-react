@@ -1,5 +1,5 @@
 import type { RootState } from "@/state/store";
-import Header from "@/components/parts/Header";
+import { Header } from "@/components/parts";
 
 import { useSelector } from "react-redux";
 import { Navigate, Outlet, useLocation } from "react-router-dom";

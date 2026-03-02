@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Dashboard, LoginPage } from "@/pages";
+import { LoginPage, Dashboard2 } from "@/pages";
 import AuthLayout from "./AuthLayout";
 import MainLayout from "./MainLayout";
 
@@ -8,7 +8,7 @@ const Routing = () => {
     <BrowserRouter>
       <Routes>
         <Route element={<MainLayout />}>
-          <Route path={"/"} element={<Dashboard />} />
+          <Route path={"/"} element={<Dashboard2 />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route path={"/sign-in"} element={<LoginPage />} />
