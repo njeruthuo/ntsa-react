@@ -1,4 +1,4 @@
-name: Build the code
+name: build-react
 
 on:
     pull_request:
@@ -9,7 +9,7 @@ on:
             - main
 
 jobs:
-    build:
+    build-react:
         runs-on: ubuntu-latest
 
         strategy:
