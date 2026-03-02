@@ -1,4 +1,5 @@
 import type { RootState } from "@/state/store";
+import Header from "@/components/parts/Header";
 
 import { useSelector } from "react-redux";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
@@ -12,7 +13,18 @@ const AuthLayout = () => {
 
   const redirectTo = next && next.trim() !== "" ? next : "/";
 
-  return <>{isLoggedIn ? <Navigate to={redirectTo} replace /> : <Outlet />}</>;
+  return (
+    <>
+      {isLoggedIn ? (
+        <Navigate to={redirectTo} replace />
+      ) : (
+        <>
+          <Header pathname={location.pathname} />
+          <Outlet />
+        </>
+      )}
+    </>
+  );
 };
 
 export default AuthLayout;

@@ -1,7 +1,12 @@
 import Routing from "@/system/Routing";
 
+
 function App() {
-  return <Routing />;
+  return (
+    <>
+      <Routing />
+    </>
+  );
 }
 
 export default App;
