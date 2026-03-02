@@ -1,7 +1,10 @@
-name: Build the code
+name: build-react
 
 on:
     pull_request:
+        branches:
+            - main
+    push:
         branches:
             - main
 
@@ -11,7 +14,7 @@ jobs:
 
         strategy:
             matrix:
-                node-version: [18, 20, 22]
+                node-version: [20, 22]
 
         steps:
             - name: Checkout code
