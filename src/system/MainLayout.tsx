@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import Header from "@/components/parts/Header";
 
 import type { RootState } from "@/state/store";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
@@ -12,7 +13,12 @@ const MainLayout = () => {
     return <Navigate to={`/sign-in?next=${location.pathname}`} replace />;
   }
 
-  return <Outlet />;
+  return (
+    <>
+      <Header pathname={location.pathname} />
+      <Outlet />
+    </>
+  );
 };
 
 export default MainLayout;
