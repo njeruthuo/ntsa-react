@@ -24,7 +24,7 @@ export const assetsApi = createApi({
         body,
       }),
       providesTags: ["History"],
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
 
