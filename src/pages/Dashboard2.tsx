@@ -177,7 +177,7 @@ const Dashboard2 = () => {
                   <th>Owner Name</th>
                   <td>{FilteredLimiterData?.actual_owner}</td>
                   <th>Owner ID</th>
-                  <td>{FilteredLimiterData?.unit_id}</td>
+                  <td>{FilteredLimiterData?.actual_owner}</td>
                   <th>Owner Phone</th>
                   <td>{FilteredLimiterData?.actual_owner_phone_no}</td>
                 </tr>
@@ -188,6 +188,34 @@ const Dashboard2 = () => {
                   <td>{FilteredLimiterData?.chasis_no}</td>
                   <th>Make & Type</th>
                   <td>{foundAsset?.make}</td>
+                </tr>
+                <tr>
+                  <th>Limiter Type</th>
+                  <td>{FilteredLimiterData?.limiter_type}</td>
+                  <th>Limiter Serial</th>
+                  <td>{FilteredLimiterData?.unit_id}</td>
+                  <th>Fitting Agent Name</th>
+                  <td>{FilteredLimiterData?.agent_name}</td>
+                </tr>
+                <tr>
+                  <th>Fitting Agent ID</th>
+                  <td>{FilteredLimiterData?.agent_id}</td>
+                  <th>Fitting Agent Phone</th>
+                  <td>{FilteredLimiterData?.agent_phone}</td>
+                  <th>Fitting Agent Email</th>
+                  <td>{FilteredLimiterData?.agent_email}</td>
+                </tr>
+                <tr>
+                  <th>N & L of Station</th>
+                  <td>{FilteredLimiterData?.station}</td>
+                  <th>Installation Date</th>
+                  <td>{FilteredLimiterData?.limiter_fitting_date}</td>
+                  <th>Business Number</th>
+                  <td>{FilteredLimiterData?.agent_business_number}</td>
+                </tr>
+                <tr>
+                  <th>Certificate Number</th>
+                  <td>{FilteredLimiterData?.certificate_no}</td>
                 </tr>
               </tbody>
             </table>
