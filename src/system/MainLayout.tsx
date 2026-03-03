@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import Header from "@/components/parts/Header";
+import { Header } from "@/components/parts";
 
 import type { RootState } from "@/state/store";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
