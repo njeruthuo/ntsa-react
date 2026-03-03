@@ -10,11 +10,12 @@ export interface AuthState {
 }
 
 const storedToken = localStorage.getItem("token");
+const user_id = localStorage.getItem("user_id");
 
 const initialState: AuthState = {
   isLoggedIn: !!storedToken,
-  token: "",
-  user_id: "",
+  token: storedToken || "",
+  user_id: user_id || "",
   client_id: "",
   contact_id: "",
   client_name: "",
@@ -24,7 +25,10 @@ export const authSlice = createSlice({
   name: "authSlice",
   initialState,
   reducers: {
-    logout: (state) => ({ ...state, ...initialState }),
+    logout: (state) => {
+      localStorage.clear();
+      state.isLoggedIn = false;
+    },
     setCredentials: (state, action) => {
       return {
         ...state,

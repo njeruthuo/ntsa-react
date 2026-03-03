@@ -1,111 +1,136 @@
-import React, { useState } from "react";
-
-interface LimiterInfo {
-  actual_owner?: string;
-  actual_owner_id?: string;
-  actual_owner_phone_no?: string;
-  reg_no?: string;
-  chasis_no?: string;
-  make?: string;
-  limiter_type?: string;
-  limiter_serial?: string;
-  agent_name?: string;
-  agent_idno?: string;
-  phone_number?: string;
-  email_address?: string;
-  station_location?: string;
-  limiter_fitting_date?: string;
-  business_regno?: string;
-  certificate_no?: string;
-}
-
-interface LocationRecord {
-  location_time?: string;
-  lat?: number;
-  lon?: number;
-  speed?: number;
-  msg_type?: string;
-}
-
-interface Asset {
-  limiter_info?: LimiterInfo;
-}
+import {
+  useGetUserAssetsQuery,
+  type Asset,
+  useFilterDataQuery,
+  useGetHistoryDataQuery,
+} from "@/state/reducers/assetsApi";
+import type { RootState } from "@/state/store";
+import { parseFixTime } from "@/utils/dateParser";
+import { exportHistoryToExcel } from "@/utils/excel";
+import React, { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 
 const Dashboard2 = () => {
   const [vehicle, setVehicle] = useState<string>("");
-  const [foundAsset] = useState<Asset | null>(null);
-  const [records] = useState<LocationRecord[]>([]);
-  const [loadingSpinner] = useState<boolean>(false);
-
-  const [onehour, setOnehour] = useState(true);
-  const [sixhour, setSixhour] = useState(false);
-  const [twntfourhour, setTwntfourhour] = useState(false);
-  const [svntwohour, setSvntwohour] = useState(false);
+  const [filter, setFilter] = useState(false);
+  const [foundAsset, setFoundAsset] = useState<Asset | undefined>();
+  const [duration, setDuration] = useState(1);
 
   const [page, setPage] = useState(1);
   const itemsPerPage = 15;
 
-  const filterData = (e: React.FormEvent) => {
+  const user_id = useSelector((state: RootState) => state.auth.user_id);
+
+  const { data: UserAssets, isLoading: loadingSpinner } = useGetUserAssetsQuery(
+    { user_id },
+  );
+
+  const { data: FilteredLimiterData } = useFilterDataQuery(
+    { asset_id: foundAsset?.asset_id },
+    { skip: !filter },
+  );
+
+  const { startTime, endTime } = useMemo(() => {
+    return getHistoryRange(duration);
+  }, [duration]);
+
+  const { data: HistoryData } = useGetHistoryDataQuery(
+    {
+      unit_id: FilteredLimiterData?.unit_id,
+      start_date: startTime,
+      end_date: endTime,
+    },
+    { skip: !FilteredLimiterData },
+  );
+
+  const filteredAssetList = useMemo(() => {
+    if (vehicle && vehicle?.length > 0) {
+      return UserAssets?.filter((asset) =>
+        asset.asset_name.toLowerCase().includes(vehicle.toLowerCase()),
+      );
+    }
+    return [];
+  }, [vehicle, UserAssets]);
+
+  const filterData = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Call API here
-  };
-
-  const calc = (range: string) => {
-    setOnehour(range === "one hour");
-    setSixhour(range === "six hours");
-    setTwntfourhour(range === "24 hours");
-    setSvntwohour(range === "72 hours");
-
-    // Fetch filtered data
+    setFilter(true);
   };
 
   const downloadxlsx = () => {
-    // Implement download logic
+    exportHistoryToExcel(HistoryData?.data || []);
   };
+
+  function handleSelectAsset(asset: Asset) {
+    setFoundAsset(asset);
+    setVehicle(asset.asset_name);
+  }
 
   const homeReturn = () => {
-    // Navigate back
+    setFoundAsset(undefined);
   };
 
-  const sortAccounts = (key: string) => {
-    console.log(key);
-
-    const sorted = [...records].sort((a, b) => {
+  const sortAccounts = () => {
+    const sorted = [...(HistoryData?.data || [])]?.sort((a, b) => {
       return (
-        new Date(b.location_time || "").getTime() -
-        new Date(a.location_time || "").getTime()
+        new Date(b.fixtime || "").getTime() -
+        new Date(a.fixtime || "").getTime()
       );
     });
     return sorted;
   };
 
-  const paginatedData = sortAccounts("-location_time").slice(
+  const paginatedData = sortAccounts()?.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage,
   );
 
+  const durations = [
+    { label: "1H", value: 1 },
+    { label: "6H", value: 6 },
+    { label: "24H", value: 24 },
+    { label: "72H", value: 72 },
+  ];
+
   return (
     <div className="container">
       <div className="row d-flex justify-content-center">
-        <form className="d-flex search" onSubmit={filterData}>
-          <div className="form-group">
-            <label className="label">
-              <h6>
-                <b>Search Vehicle</b>
-              </h6>
-            </label>
-            <input
-              type="text"
-              className="form-control form-control-sm"
-              value={vehicle}
-              onChange={(e) => setVehicle(e.target.value)}
-              placeholder="Search by vehicle Reg (Try with space eg SP TEST) / Serial Number"
-            />
-          </div>
-          <button type="submit" className="btn btn-primary m-4">
-            Search
-          </button>
-        </form>
+        <div>
+          <form className="d-flex search" onSubmit={filterData}>
+            <div className="form-group">
+              <label className="label">
+                <h6>
+                  <b>Search Vehicle</b>
+                </h6>
+              </label>
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                value={vehicle}
+                onChange={(e) => setVehicle(e.target.value)}
+                placeholder="Search by vehicle Reg (Try with space eg SP TEST) / Serial Number"
+              />
+            </div>
+            <button type="submit" className="btn btn-primary m-4">
+              Search
+            </button>
+          </form>
+
+          {!foundAsset &&
+            filteredAssetList &&
+            filteredAssetList?.length > 0 && (
+              <div className="shadow-cyan-50 shadow mt-0 border h-[10vh] w-full overflow-auto">
+                {filteredAssetList.map((asset) => (
+                  <p
+                    onClick={() => handleSelectAsset(asset)}
+                    className="text-sm pt-1 px-4 border border-black m-1 hover:cursor-pointer hover:bg-white"
+                  >
+                    {asset.asset_name}
+                  </p>
+                ))}
+              </div>
+            )}
+        </div>
 
         {loadingSpinner && (
           <div className="spinner-grow" role="status">
@@ -124,37 +149,16 @@ const Dashboard2 = () => {
         </div>
 
         <div className="container">
-          <button
-            className={`btn btn-sm ${onehour ? "btn-success" : "btn-primary"}`}
-            style={{ margin: 5 }}
-            onClick={() => calc("one hour")}
-          >
-            1HR DATA
-          </button>
-
-          <button
-            className={`btn btn-sm ${sixhour ? "btn-success" : "btn-primary"}`}
-            style={{ margin: 5 }}
-            onClick={() => calc("six hours")}
-          >
-            6HR DATA
-          </button>
-
-          <button
-            className={`btn btn-sm ${twntfourhour ? "btn-success" : "btn-primary"}`}
-            style={{ margin: 5 }}
-            onClick={() => calc("24 hours")}
-          >
-            24HR DATA
-          </button>
-
-          <button
-            className={`btn btn-sm ${svntwohour ? "btn-success" : "btn-primary"}`}
-            style={{ margin: 5 }}
-            onClick={() => calc("72 hours")}
-          >
-            72HR DATA
-          </button>
+          {durations.map((d) => (
+            <button
+              key={d.value}
+              style={{ margin: 5 }}
+              onClick={() => setDuration(d.value)}
+              className={`btn btn-sm ${duration === d.value ? "btn-success" : "btn-primary"}`}
+            >
+              {d.label}
+            </button>
+          ))}
 
           <button
             className="btn btn-sm btn-primary"
@@ -171,19 +175,19 @@ const Dashboard2 = () => {
               <tbody>
                 <tr>
                   <th>Owner Name</th>
-                  <td>{foundAsset.limiter_info?.actual_owner}</td>
+                  <td>{FilteredLimiterData?.actual_owner}</td>
                   <th>Owner ID</th>
-                  <td>{foundAsset.limiter_info?.actual_owner_id}</td>
+                  <td>{FilteredLimiterData?.unit_id}</td>
                   <th>Owner Phone</th>
-                  <td>{foundAsset.limiter_info?.actual_owner_phone_no}</td>
+                  <td>{FilteredLimiterData?.actual_owner_phone_no}</td>
                 </tr>
                 <tr>
                   <th>Registration Number</th>
-                  <td>{foundAsset.limiter_info?.reg_no}</td>
+                  <td>{foundAsset?.asset_name}</td>
                   <th>Chasis Number</th>
-                  <td>{foundAsset.limiter_info?.chasis_no}</td>
+                  <td>{FilteredLimiterData?.chasis_no}</td>
                   <th>Make & Type</th>
-                  <td>{foundAsset.limiter_info?.make}</td>
+                  <td>{foundAsset?.make}</td>
                 </tr>
               </tbody>
             </table>
@@ -195,25 +199,26 @@ const Dashboard2 = () => {
                     <th>Datetime</th>
                     <th>Latitude</th>
                     <th>Longitude</th>
+                    <th>Location</th>
                     <th>Speed</th>
                     <th>Violations</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedData.map((product, index) => (
-                    <tr key={index}>
-                      <td>
-                        {product.location_time &&
-                          new Date(
-                            product.location_time + "Z",
-                          ).toLocaleString()}
-                      </td>
-                      <td>{product.lat}</td>
-                      <td>{product.lon}</td>
-                      <td>{product.speed}</td>
-                      <td>{product.msg_type}</td>
-                    </tr>
-                  ))}
+                  {foundAsset &&
+                    paginatedData?.map((product, index) => (
+                      <tr key={index}>
+                        <td>
+                          {product?.fixtime &&
+                            parseFixTime(product?.fixtime).toISOString()}
+                        </td>
+                        <td>{product?.latitude}</td>
+                        <td>{product?.longitude}</td>
+                        <td>{product?.location}</td>
+                        <td>{product?.speed}</td>
+                        <td>{product?.violations || ""}</td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
 
@@ -240,3 +245,15 @@ const Dashboard2 = () => {
   );
 };
 export default Dashboard2;
+
+const getHistoryRange = (hours: number) => {
+  const now = new Date();
+  const endTime = now.toISOString();
+
+  // Calculate start time by subtracting milliseconds
+  const startTime = new Date(
+    now.getTime() - hours * 60 * 60 * 1000,
+  ).toISOString();
+
+  return { startTime, endTime };
+};
