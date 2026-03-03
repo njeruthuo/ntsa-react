@@ -1,14 +1,21 @@
 import { useState } from "react";
 import { Key, Person } from "@/components/iconjsx";
 import { loginLogo } from "@/assets/icons";
+import { useLoginUserMutation } from "@/state/reducers/auth/authApi";
 
 const LoginPage = () => {
+  const [loginUser, { isLoading }] = useLoginUserMutation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log({ username, password });
+    try {
+      await loginUser({ username, password }).unwrap();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -50,6 +57,7 @@ const LoginPage = () => {
 
             <div className=" flex justify-center text-white">
               <button
+                disabled={isLoading}
                 type="submit"
                 className="login-btn px-8 py-1 rounded-sm mt-3 bg-[#1B1C4C]"
               >
