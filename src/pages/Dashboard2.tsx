@@ -5,7 +5,7 @@ import {
   useGetHistoryDataQuery,
 } from "@/state/reducers/assetsApi";
 import type { RootState } from "@/state/store";
-import { parseFixTime } from "@/utils/dateParser";
+import { formatDate } from "@/utils/dateFormater";
 import { exportHistoryToExcel } from "@/utils/excel";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -209,7 +209,11 @@ const Dashboard2 = () => {
                   <th>N & L of Station</th>
                   <td>{FilteredLimiterData?.station}</td>
                   <th>Installation Date</th>
-                  <td>{FilteredLimiterData?.limiter_fitting_date}</td>
+                  <td>
+                    {new Date(
+                      FilteredLimiterData?.limiter_fitting_date,
+                    ).toLocaleString()}
+                  </td>
                   <th>Business Number</th>
                   <td>{FilteredLimiterData?.agent_business_number}</td>
                 </tr>
@@ -237,8 +241,7 @@ const Dashboard2 = () => {
                     paginatedData?.map((product, index) => (
                       <tr key={index}>
                         <td>
-                          {product?.fixtime &&
-                            parseFixTime(product?.fixtime).toISOString()}
+                          {product?.fixtime && formatDate(product?.fixtime)}
                         </td>
                         <td>{product?.latitude}</td>
                         <td>{product?.longitude}</td>
