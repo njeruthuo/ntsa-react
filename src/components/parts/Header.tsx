@@ -44,12 +44,13 @@ const Header = ({ pathname }: { pathname: string }) => {
           </div>
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
             <button
+              onClick={() => dispatch(logout())}
               type="button"
               className="relative rounded-full p-1 text-gray-400 hover:text-white focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500"
             >
               <span className="absolute -inset-1.5" />
               {pathname !== "/sign-in" && (
-                <div onClick={() => dispatch(logout())} className="flex">
+                <div className="flex">
                   <button className="logout-btn">Logout</button>
                   <ArrowRightStartOnRectangleIcon
                     aria-hidden="true"

@@ -24,7 +24,15 @@ export const authSlice = createSlice({
   name: "authSlice",
   initialState,
   reducers: {
-    logout: (state) => ({ ...state, ...initialState }),
+    logout: (state) => {
+      console.log(state, "state now");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("client_id");
+      localStorage.removeItem("contact_id");
+      localStorage.removeItem("client_name");
+      state.isLoggedIn = false;
+    },
     setCredentials: (state, action) => {
       return {
         ...state,

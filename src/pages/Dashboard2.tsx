@@ -1,4 +1,7 @@
+import { useGetUserAssetsQuery } from "@/state/reducers/assetsApi";
+import type { RootState } from "@/state/store";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 
 interface LimiterInfo {
   actual_owner?: string;
@@ -44,6 +47,12 @@ const Dashboard2 = () => {
 
   const [page, setPage] = useState(1);
   const itemsPerPage = 15;
+
+  const user_id = useSelector((state: RootState) => state.auth.user_id);
+
+  const { data } = useGetUserAssetsQuery({ user_id });
+
+  console.log(data, "data");
 
   const filterData = (e: React.FormEvent) => {
     e.preventDefault();
