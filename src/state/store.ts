@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { authApi, assetsApi, authReducer } from "./reducers";
+import { authApi, assetsApi, authReducer, assetReducer } from "./reducers";
 
 export const store = configureStore({
   reducer: {
@@ -7,6 +7,7 @@ export const store = configureStore({
     [assetsApi.reducerPath]: assetsApi.reducer,
 
     auth: authReducer,
+    assets: assetReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat([authApi.middleware, assetsApi.middleware]),

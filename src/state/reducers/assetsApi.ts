@@ -1,18 +1,47 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "./baseQuery";
+import { setHistory } from "./assetSlice";
 
 export const assetsApi = createApi({
   reducerPath: "assetsApi",
   baseQuery: baseQuery,
+  tagTypes: ["History"],
   endpoints: (builder) => ({
     getUserAssets: builder.query<Asset[], { user_id: string }>({
       query: ({ user_id }) =>
         `/settings/assetmanagement/getassets?userid=${user_id}`,
     }),
+
+    filterData: builder.query({
+      query: ({ asset_id }) =>
+        `/settings/assetmanagement/getspeedlimiterdetails?assetid=${asset_id}`,
+    }),
+
+    getHistoryData: builder.query<HistoryApiResponse, HistoryPayload>({
+      query: (body) => ({
+        url: `/AnalyticsService/gethistory`,
+        method: "POST",
+        body,
+      }),
+      providesTags: ["History"],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          dispatch(setHistory(data.data));
+        } catch (error) {
+          console.error("History fetch failed", error);
+        }
+      },
+    }),
   }),
 });
 
-export const { useGetUserAssetsQuery } = assetsApi;
+export const {
+  useFilterDataQuery,
+  useGetUserAssetsQuery,
+  useGetHistoryDataQuery,
+} = assetsApi;
 
 export interface AssetStatusDetails {
   status_id: number;
@@ -29,6 +58,7 @@ export interface Asset {
   asset_category: string | null;
   asset_id: number;
   asset_model: string | null;
+  violations: string;
   asset_name: string;
   asset_status: string;
   asset_status_details: AssetStatusDetails;
@@ -54,4 +84,31 @@ export interface Asset {
   realOdometer: number;
   usage: string | null;
   year_of_manufacture: number | null;
+}
+
+export interface HistoryItem {
+  device_timezone: number;
+  unit_id: string;
+  fixtime: string; // Format: "m/dd/yyyy h:mm:ss AM/PM"
+  alerts: unknown[]; // Provided as an empty array []
+  location: string;
+  speed: number;
+  course: number;
+  longitude: number;
+  latitude: number;
+  reg_no: string;
+  driver: string;
+  violations: string;
+  mileage: number;
+}
+
+export interface HistoryApiResponse {
+  response: "success" | "error";
+  data: HistoryItem[];
+}
+
+export interface HistoryPayload {
+  unit_id: string;
+  start_date: string;
+  end_date: string;
 }
